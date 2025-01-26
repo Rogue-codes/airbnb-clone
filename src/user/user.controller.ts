@@ -20,7 +20,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserGuard } from 'src/guards/user.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('API')
+@ApiTags('User')
 @ApiBearerAuth('access-token')
 @Controller('user')
 export class UserController {

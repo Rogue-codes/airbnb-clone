@@ -11,6 +11,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmailModule } from './email/email.module';
 import { WalletModule } from './wallet/wallet.module';
 import { AuthModule } from './auth/auth.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { AuthModule } from './auth/auth.module';
     EventEmitterModule.forRoot(),
     EmailModule,
     WalletModule,
-    AuthModule
+    AuthModule,
+    RoomModule
   ],
   controllers: [AppController],
   providers: [AppService],

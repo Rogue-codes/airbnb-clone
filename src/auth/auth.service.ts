@@ -5,6 +5,12 @@ import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import * as lodash from 'lodash';
 
+export interface IUser {
+  email: string;
+  id: string;
+  isVerified: boolean;
+  isActive: boolean;
+}
 @Injectable()
 export class AuthService {
   constructor(
@@ -39,12 +45,7 @@ export class AuthService {
       throw new BadRequestException('Invalid credentials');
     }
 
-    const userObject: {
-      email: string;
-      id: string;
-      isVerified: boolean;
-      isActive: boolean;
-    } = {
+    const userObject: IUser = {
       email,
       id: user._id as string,
       isVerified: user.isVerified,
