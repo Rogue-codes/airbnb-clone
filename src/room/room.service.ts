@@ -50,7 +50,7 @@ export class RoomService {
 
     if (room.is_published) {
       throw new BadRequestException(
-        "Room has already been published. create a new room instead...",
+        'Room has already been published. create a new room instead...',
       );
     }
 
@@ -60,13 +60,58 @@ export class RoomService {
     return room;
   }
 
-  async findAllUserRooms(user:IUser) {
-    const rooms = await this.roomModel.find({
+  async findAllUserRooms(
+    user: IUser,
+    max_price?: number,
+    min_price?: number,
+    max_num_of_rooms?: number,
+    min_num_of_rooms?: number,
+    search?: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    // Build the query object dynamically based on the provided filters
+    const query: Record<string, any> = {
       userId: user.id,
-      is_published: true
-    })
+      is_published: true,
+    };
 
-    return rooms;
+    // Add price filters if provided
+    if (min_price !== undefined) {
+      query.price = { ...query.price, $gte: min_price };
+    }
+    if (max_price !== undefined) {
+      query.price = { ...query.price, $lte: max_price };
+    }
+
+    // Add number of rooms filters if provided
+    if (min_num_of_rooms !== undefined) {
+      query.num_of_rooms = { ...query.num_of_rooms, $gte: min_num_of_rooms };
+    }
+    if (max_num_of_rooms !== undefined) {
+      query.num_of_rooms = { ...query.num_of_rooms, $lte: max_num_of_rooms };
+    }
+
+    if (search) {
+      query.$or = [{ name: { $regex: search, $options: 'i' } }];
+    }
+
+    const rooms = await this.roomModel
+      .find(query)
+      .skip(page && limit ? (page - 1) * limit : 0)
+      .limit(limit || 10)
+      .sort('-createdAt')
+      .exec();
+
+      const totalCount = await this.roomModel.countDocuments(query);
+
+    return {
+      results: rooms,
+      currentPage: page || 1,
+      limit: limit || 10,
+      totalCount,
+      totalPages:Math.ceil(totalCount/(limit || 10)),
+    };
   }
 
   findOne(id: number) {
@@ -81,7 +126,7 @@ export class RoomService {
     return `This action removes a #${id} room`;
   }
 
-  async isValidRoomTitle(userId: string, title: string):Promise<boolean> {
+  async isValidRoomTitle(userId: string, title: string): Promise<boolean> {
     const room = await this.roomModel.findOne({
       userId,
       title,
